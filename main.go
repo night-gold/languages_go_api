@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -12,7 +13,7 @@ var db *sql.DB
 
 func checkErr(err error) {
 	if err != nil {
-		panic(err)
+		fmt.Errorf("pkg: %v", err)
 	}
 }
 
@@ -23,6 +24,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 
 func newRouter() *chi.Mux {
 	r := chi.NewRouter()
+	r.Use(middleware.Recoverer)
 	r.HandleFunc("/", homePage)
 	r.HandleFunc("/code", LanguageCode)
 	r.Mount("/{lang}/admin", adminRouter())
@@ -33,7 +35,6 @@ func newRouter() *chi.Mux {
 func handleRequests() {
 	var err error
 	r := newRouter()
-	r.Use(middleware.Recoverer)
 
 	db, err = sql.Open("mysql", "langage:Password123@/languages?charset=utf8mb4")
 	checkErr(err)

@@ -11,7 +11,6 @@ func LanguagesList(w http.ResponseWriter, r *http.Request) {
 	//lang := chi.URLParam(r, "lang")
 	query, err := db.Query("SELECT * FROM languages;")
 	checkErr(err)
-
 	var id int
 	var code string
 	var codes []Code
