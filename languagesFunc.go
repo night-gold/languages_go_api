@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
@@ -18,13 +17,14 @@ func LanguagesList(w http.ResponseWriter, r *http.Request) {
 	defer query.Close()
 
 	for query.Next() {
-		err := query.Scan(&id, &code)
+		err := query.Scan(id, code)
 		checkErr(err)
-		codes = append(codes, Code{id: id, code: code})
+		codes = append(codes, Code{Id: id, Code: code})
 	}
 	codesMarshalled, err := json.Marshal(codes)
-
-	fmt.Fprint(w, string(codesMarshalled))
+	checkErr(err)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(codesMarshalled)
 }
 
 // LanguageCode Gives the code for the current language
