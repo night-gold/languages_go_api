@@ -17,7 +17,7 @@ func LanguagesList(w http.ResponseWriter, r *http.Request) {
 	defer query.Close()
 
 	for query.Next() {
-		err := query.Scan(id, code)
+		err := query.Scan(&id, &code)
 		checkErr(err)
 		codes = append(codes, Code{Id: id, Code: code})
 	}
