@@ -3,24 +3,27 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/go-chi/chi"
 )
 
-// LanguagesList listing des languages pour la langue
+// LanguagesList listing des languages pour le code
 func LanguagesList(w http.ResponseWriter, r *http.Request) {
-	//lang := chi.URLParam(r, "lang")
-	query, err := db.Query("SELECT * FROM languages;")
+	lang := chi.URLParam(r, "lang")
+	query, err := db.Query("SELECT * FROM languages INNER JOIN languages_name WHERE languages.code LIKE languages_name.fk_language AND languages.code like ?;", lang)
 	checkErr(err)
 	var code string
-	var codes []Code
+	var name string
+	var languages []Language
 
 	defer query.Close()
 
 	for query.Next() {
-		err := query.Scan(&code)
+		err := query.Scan(&code, &name)
 		checkErr(err)
-		codes = append(codes, Code{Code: code})
+		languages = append(languages, Language{Code: code, Name: name})
 	}
-	codesMarshalled, err := json.Marshal(codes)
+	codesMarshalled, err := json.Marshal(languages)
 	checkErr(err)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(codesMarshalled)
