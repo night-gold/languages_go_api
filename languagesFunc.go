@@ -10,7 +10,7 @@ import (
 // LanguagesList listing des languages pour le code
 func LanguagesList(w http.ResponseWriter, r *http.Request) {
 	lang := chi.URLParam(r, "lang")
-	query, err := db.Query("SELECT * FROM languages INNER JOIN languages_name WHERE languages.code LIKE languages_name.fk_language AND languages.code like ?;", lang)
+	query, err := db.Query("SELECT languages_name.fk_language_name,languages_name.name FROM languages INNER JOIN languages_name WHERE languages.code LIKE languages_name.fk_language AND languages.code like ?;", lang)
 	checkErr(err)
 	var code string
 	var name string
