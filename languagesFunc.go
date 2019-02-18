@@ -10,16 +10,15 @@ func LanguagesList(w http.ResponseWriter, r *http.Request) {
 	//lang := chi.URLParam(r, "lang")
 	query, err := db.Query("SELECT * FROM languages;")
 	checkErr(err)
-	var id int
 	var code string
 	var codes []Code
 
 	defer query.Close()
 
 	for query.Next() {
-		err := query.Scan(&id, &code)
+		err := query.Scan(&code)
 		checkErr(err)
-		codes = append(codes, Code{Id: id, Code: code})
+		codes = append(codes, Code{Code: code})
 	}
 	codesMarshalled, err := json.Marshal(codes)
 	checkErr(err)
