@@ -29,10 +29,24 @@ func LanguagesList(w http.ResponseWriter, r *http.Request) {
 	w.Write(codesMarshalled)
 }
 
-// LanguageCode Gives the code for the current language
+// LanguageCode Lists all the codes available.
 func LanguageCode(w http.ResponseWriter, r *http.Request) {
-	message := "Current language code"
-	w.Write([]byte(message))
+	var code string
+	var codes []Code
+	query, err := db.Query("SELECT * FROM languages;")
+	checkErr(err)
+	defer query.Close()
+
+	for query.Next() {
+		err := query.Scan(&code)
+		checkErr(err)
+		codes = append(codes, Code{Code: code})
+	}
+
+	codesMarshalled, err := json.Marshal(codes)
+	checkErr(err)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(codesMarshalled))
 }
 
 // LanguageName Gives the code for the current language
@@ -42,6 +56,7 @@ func LanguageName(w http.ResponseWriter, r *http.Request) {
 	var resname LangName
 	rname, err := db.Prepare("SELECT name FROM languages_name WHERE fk_language LIKE ? AND fk_language_name LIKE fk_language;")
 	checkErr(err)
+	defer rname.Close()
 	err = rname.QueryRow(lang).Scan(&name)
 	checkErr(err)
 
@@ -50,10 +65,4 @@ func LanguageName(w http.ResponseWriter, r *http.Request) {
 	checkErr(err)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(codesMarshalled)
-}
-
-// LanguageInfo Gives the current language information, code and names
-func LanguageInfo(w http.ResponseWriter, r *http.Request) {
-	message := "Current language informations"
-	w.Write([]byte(message))
 }
