@@ -37,8 +37,19 @@ func LanguageCode(w http.ResponseWriter, r *http.Request) {
 
 // LanguageName Gives the code for the current language
 func LanguageName(w http.ResponseWriter, r *http.Request) {
-	message := "Current language name"
-	w.Write([]byte(message))
+	lang := chi.URLParam(r, "lang")
+	var name string
+	var resname LangName
+	rname, err := db.Prepare("SELECT name FROM languages_name WHERE fk_language LIKE ? AND fk_language_name LIKE fk_language;")
+	checkErr(err)
+	err = rname.QueryRow(lang).Scan(&name)
+	checkErr(err)
+
+	resname = LangName{Name: name}
+	codesMarshalled, err := json.Marshal(resname)
+	checkErr(err)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(codesMarshalled)
 }
 
 // LanguageInfo Gives the current language information, code and names
