@@ -4,8 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
-	"os"
-	"path/filepath"
 
 	_ "github.com/go-sql-driver/mysql"
 
@@ -29,11 +27,6 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 func newRouter() *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)
-	//Statics file server
-	workDir, _ := os.Getwd()
-	filesDir := filepath.Join(workDir, "statics")
-	FileServer(r, "/statics", http.Dir(filesDir))
-	//Other routes
 	r.HandleFunc("/", homePage)
 	r.HandleFunc("/code", LanguageCode)
 	r.Mount("/{lang}/admin", adminRouter())
