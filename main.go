@@ -1,52 +1,27 @@
 package main
 
 import (
-	"database/sql"
+	"flag"
 	"fmt"
-	"net/http"
+	"log"
 
-	_ "github.com/go-sql-driver/mysql"
-
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
+	"github.com/valyala/fasthttp"
 )
 
-var db *sql.DB
-
-func checkErr(err error) {
-	if err != nil {
-		fmt.Errorf("pkg: %v", err)
-	}
-}
-
-func homePage(w http.ResponseWriter, r *http.Request) {
-	message := "Welcome on this test API"
-	w.Write([]byte(message))
-}
-
-func newRouter() *chi.Mux {
-	r := chi.NewRouter()
-	r.Use(middleware.Recoverer)
-	r.HandleFunc("/", homePage)
-	r.HandleFunc("/code", LanguageCode)
-	r.Mount("/{lang}/admin", adminRouter())
-	r.Mount("/{lang}", languagesRouter())
-	return r
-}
-
-func handleRequests() {
-	var err error
-	r := newRouter()
-
-	db, err = sql.Open("mysql", "langage:Password123@/languages?charset=utf8mb4")
-	checkErr(err)
-	if err := http.ListenAndServe(":8080", r); err != nil {
-		panic(err)
-	}
-
-	defer db.Close()
-}
+var (
+	addr = flag.String("addr", ":8080", "TCP address to listen to, default to *:8080")
+)
 
 func main() {
-	handleRequests()
+	flag.Parse()
+
+	h := requestHandler
+
+	if err := fasthttp.ListenAndServe(*addr, h); err != nil {
+		log.Fatalf("Error in ListenAndServe: %s", err)
+	}
+}
+
+func requestHandler(ctx *fasthttp.RequestCtx) {
+	fmt.Fprintf(ctx, "Hello, world!\n\n")
 }
